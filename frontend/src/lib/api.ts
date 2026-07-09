@@ -8,6 +8,14 @@ export interface StockInfo {
   market_cap: number
   currency: string
   pe_ratio: number | null
+  forward_pe: number | null
+  peg_ratio: number | null
+  price_to_book: number | null
+  enterprise_value: number | null
+  return_on_equity: number | null
+  debt_to_equity: number | null
+  profit_margin: number | null
+  operating_margin: number | null
   dividend_yield: number | null
   beta: number | null
   fifty_two_week_high: number | null
@@ -15,6 +23,7 @@ export interface StockInfo {
   current_price: number | null
   previous_close: number | null
   description: string
+  exchange: string
 }
 
 export interface PricePoint {
@@ -83,11 +92,72 @@ export interface NewsResult {
   }
 }
 
+export interface TechnicalResult {
+  current_price: number
+  indicators: {
+    RSI: number
+    MACD: number
+    MACD_Signal: number
+    MACD_Hist: number
+    SMA_20: number
+    SMA_50: number
+    SMA_200: number | null
+    EMA_20: number
+    Upper_BB: number
+    Lower_BB: number
+    ATR: number
+    OBV: number
+  }
+  signals: Record<string, string>
+  summary: {
+    bullish_signals: number
+    bearish_signals: number
+    overall: string
+  }
+}
+
+export interface SearchSuggestion {
+  symbol: string
+  shortname: string
+  exchange: string
+  type: string
+  score: number
+}
+
 // API functions
 export async function searchStock(ticker: string, period = "2y"): Promise<StockData> {
   const res = await fetch(`${API_BASE}/api/stocks/search/${ticker}?period=${period}`)
   if (!res.ok) throw new Error(`Failed to fetch stock data: ${res.statusText}`)
   return res.json()
+}
+
+export async function searchAutocomplete(query: string): Promise<SearchSuggestion[]> {
+  if (!query) return []
+  const res = await fetch(`/api/search?q=${encodeURIComponent(query)}`)
+  if (!res.ok) return []
+  return res.json()
+}
+
+export async function logRecentSearch(query: string, ticker?: string) {
+  try {
+    await fetch("/api/search/recent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, ticker }),
+    })
+  } catch (e) {
+    // Fail silently, it's just logging
+  }
+}
+
+export async function getRecentSearches() {
+  try {
+    const res = await fetch("/api/search/recent")
+    if (!res.ok) return []
+    return res.json()
+  } catch (e) {
+    return []
+  }
 }
 
 export async function getFullAnalysis(ticker: string, days = 30, period = "2y"): Promise<AnalysisResult> {
@@ -105,6 +175,12 @@ export async function getMonteCarloAnalysis(ticker: string, days = 30, simulatio
 export async function getAIInsight(ticker: string, days = 30) {
   const res = await fetch(`${API_BASE}/api/analysis/insight/${ticker}?days=${days}`)
   if (!res.ok) throw new Error(`Insight failed: ${res.statusText}`)
+  return res.json()
+}
+
+export async function getTechnicals(ticker: string, period = "2y"): Promise<TechnicalResult> {
+  const res = await fetch(`${API_BASE}/api/analysis/technicals/${ticker}?period=${period}`)
+  if (!res.ok) throw new Error(`Technicals failed: ${res.statusText}`)
   return res.json()
 }
 

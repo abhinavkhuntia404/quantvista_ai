@@ -1,5 +1,7 @@
 import type { Metadata } from "next"
 import "./globals.css"
+import AuthProvider from "@/components/AuthProvider"
+import { ThemeProvider } from "@/components/ThemeProvider"
 
 export const metadata: Metadata = {
   title: "QuantVista AI — Quantitative Stock Analysis Platform",
@@ -13,9 +15,28 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="antialiased">
-        {children}
+    <html lang="en" suppressHydrationWarning>
+      <body className="antialiased transition-colors duration-500" suppressHydrationWarning>
+        <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
+          <AuthProvider>
+            {children}
+          </AuthProvider>
+        </ThemeProvider>
+        
+        {/* Google Translate Script for Local Indian Languages */}
+        <div id="google_translate_element" className="fixed bottom-4 left-4 z-[100] opacity-30 hover:opacity-100 transition-opacity" style={{ transform: "scale(0.8)", transformOrigin: "bottom left" }}></div>
+        <script type="text/javascript" dangerouslySetInnerHTML={{
+          __html: `
+            function googleTranslateElementInit() {
+              new google.translate.TranslateElement({
+                pageLanguage: 'en', 
+                includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or', 
+                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
+              }, 'google_translate_element');
+            }
+          `
+        }} />
+        <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
       </body>
     </html>
   )

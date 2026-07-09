@@ -1,82 +1,99 @@
 "use client"
 
 import { useMemo } from "react"
-import {
-  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip,
-  ResponsiveContainer
-} from "recharts"
+import dynamic from "next/dynamic"
+
+// Dynamically import plotly to avoid SSR issues
+const Plot = dynamic(() => import("react-plotly.js"), { 
+  ssr: false, 
+  loading: () => <div className="w-full h-full animate-pulse bg-white/5 rounded-lg flex items-center justify-center text-sm text-slate-500">Loading interactive chart...</div> 
+})
 
 interface PricePoint {
   date: string
+  open: number
+  high: number
+  low: number
   close: number
   volume: number
 }
 
 export default function PriceChart({ data }: { data: PricePoint[] }) {
   const chartData = useMemo(() => {
-    // Show last 120 data points for clarity
-    const sliced = data.slice(-120)
-    return sliced.map(d => ({
-      date: d.date,
-      price: d.close,
-      volume: d.volume,
-    }))
+    return {
+      x: data.map(d => d.date),
+      open: data.map(d => d.open),
+      high: data.map(d => d.high),
+      low: data.map(d => d.low),
+      close: data.map(d => d.close),
+      volume: data.map(d => d.volume),
+      colors: data.map(d => d.close >= d.open ? '#10b981' : '#ef4444')
+    }
   }, [data])
 
-  const minPrice = Math.min(...chartData.map(d => d.price)) * 0.98
-  const maxPrice = Math.max(...chartData.map(d => d.price)) * 1.02
-  const priceChange = chartData.length > 1
-    ? chartData[chartData.length - 1].price - chartData[0].price
-    : 0
-  const isPositive = priceChange >= 0
-
   return (
-    <div style={{ width: "100%", height: 280 }}>
-      <ResponsiveContainer>
-        <AreaChart data={chartData}>
-          <defs>
-            <linearGradient id="priceGradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={isPositive ? "#10b981" : "#ef4444"} stopOpacity={0.3} />
-              <stop offset="100%" stopColor={isPositive ? "#10b981" : "#ef4444"} stopOpacity={0} />
-            </linearGradient>
-          </defs>
-          <CartesianGrid strokeDasharray="3 3" stroke="rgba(99,115,148,0.08)" />
-          <XAxis
-            dataKey="date"
-            tick={{ fontSize: 10, fill: "#64748b" }}
-            tickFormatter={(v) => v.slice(5)}
-            interval="preserveStartEnd"
-            stroke="rgba(99,115,148,0.1)"
-          />
-          <YAxis
-            domain={[minPrice, maxPrice]}
-            tick={{ fontSize: 10, fill: "#64748b" }}
-            tickFormatter={(v) => `$${v.toFixed(0)}`}
-            stroke="rgba(99,115,148,0.1)"
-            width={60}
-          />
-          <Tooltip
-            contentStyle={{
-              background: "#111827",
-              border: "1px solid rgba(99,115,148,0.15)",
-              borderRadius: "8px",
-              fontSize: "12px",
-              color: "#e2e8f0",
-            }}
-            formatter={(value) => [`$${Number(value).toFixed(2)}`, "Price"]}
-            labelFormatter={(l) => `Date: ${l}`}
-          />
-          <Area
-            type="monotone"
-            dataKey="price"
-            stroke={isPositive ? "#10b981" : "#ef4444"}
-            strokeWidth={2}
-            fill="url(#priceGradient)"
-            dot={false}
-            activeDot={{ r: 4, fill: isPositive ? "#10b981" : "#ef4444" }}
-          />
-        </AreaChart>
-      </ResponsiveContainer>
+    <div style={{ width: "100%", height: 500 }}>
+      <Plot
+        data={[
+          {
+            x: chartData.x,
+            close: chartData.close,
+            high: chartData.high,
+            low: chartData.low,
+            open: chartData.open,
+            increasing: { line: { color: '#10b981' } },
+            decreasing: { line: { color: '#ef4444' } },
+            type: 'candlestick',
+            name: 'Price',
+            yaxis: 'y'
+          },
+          {
+            x: chartData.x,
+            y: chartData.volume,
+            type: 'bar',
+            name: 'Volume',
+            yaxis: 'y2',
+            marker: { color: chartData.colors, opacity: 0.3 }
+          }
+        ]}
+        layout={{
+          autosize: true,
+          margin: { l: 50, r: 20, t: 20, b: 40 },
+          paper_bgcolor: 'transparent',
+          plot_bgcolor: 'transparent',
+          font: { color: '#94a3b8', family: 'Inter' },
+          dragmode: 'zoom',
+          hovermode: 'x unified',
+          xaxis: {
+            rangeslider: { visible: false },
+            showgrid: true,
+            gridcolor: 'rgba(99,115,148,0.1)',
+            type: 'date',
+            zeroline: false
+          },
+          yaxis: {
+            domain: [0.3, 1],
+            showgrid: true,
+            gridcolor: 'rgba(99,115,148,0.1)',
+            zeroline: false,
+          },
+          yaxis2: {
+            domain: [0, 0.25],
+            showgrid: false,
+            showticklabels: false,
+            zeroline: false
+          },
+          showlegend: false,
+        }}
+        useResizeHandler={true}
+        style={{ width: "100%", height: "100%" }}
+        config={{ 
+          displayModeBar: true, 
+          scrollZoom: true,
+          modeBarButtonsToRemove: ['lasso2d', 'select2d'],
+          displaylogo: false
+        }}
+      />
     </div>
   )
 }

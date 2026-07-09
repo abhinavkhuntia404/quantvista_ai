@@ -3,15 +3,18 @@
 import { useState } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
+import { ThemeToggle } from "@/components/ThemeToggle"
 import {
   BarChart3, LayoutDashboard, PieChart, FileText,
   Settings, ChevronLeft, ChevronRight, Briefcase,
-  TrendingUp, Menu, X
+  TrendingUp, Menu, X, Star, BookOpen, User, LogOut
 } from "lucide-react"
 
 const navItems = [
   { href: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
   { href: "/dashboard/portfolio", icon: Briefcase, label: "Portfolio" },
+  { href: "/dashboard/watchlist", icon: Star, label: "Watchlist" },
+  { href: "/academy", icon: BookOpen, label: "Academy" },
 ]
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -70,14 +73,20 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           })}
         </nav>
 
-        {/* Collapse button */}
         <div className="p-3 border-t hidden md:block" style={{ borderColor: "var(--border)" }}>
           <button
             onClick={() => setCollapsed(!collapsed)}
-            className="sidebar-link w-full justify-center"
+            className="sidebar-link w-full justify-center mb-2"
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
+          
+          <div className={`flex items-center ${collapsed ? "justify-center flex-col gap-4" : "justify-between px-3"} py-2 mt-4`}>
+            <ThemeToggle />
+            <Link href="/api/auth/signout" className="text-sm font-medium hover:text-red-400" style={{ color: "var(--text-secondary)" }}>
+              {!collapsed ? "Sign Out" : "Out"}
+            </Link>
+          </div>
         </div>
       </aside>
 

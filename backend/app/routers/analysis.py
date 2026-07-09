@@ -4,6 +4,7 @@ Analysis Router — endpoints for quantitative analysis
 from fastapi import APIRouter, HTTPException, Query
 from app.services.stock_service import get_stock_data
 from app.services.quant_engine import QuantEngine
+from app.services.technical_analysis import TechnicalAnalysisEngine
 
 router = APIRouter()
 
@@ -91,5 +92,16 @@ async def ai_insight(ticker: str, days: int = 30, period: str = "2y"):
         df = get_stock_data(ticker.upper(), period=period)
         engine = QuantEngine(df["Close"], ticker=ticker.upper())
         return {"insight": engine.generate_ai_insight(days=days)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+
+@router.get("/technicals/{ticker}")
+async def technicals_analysis(ticker: str, period: str = "2y"):
+    """Get comprehensive technical analysis indicators."""
+    try:
+        df = get_stock_data(ticker.upper(), period=period)
+        ta_engine = TechnicalAnalysisEngine(df)
+        return ta_engine.get_all_indicators()
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))

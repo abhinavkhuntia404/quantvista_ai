@@ -3,10 +3,16 @@ Stock Router — endpoints for stock data retrieval
 """
 from fastapi import APIRouter, HTTPException, Query
 from fastapi.responses import FileResponse
-from app.services.stock_service import get_stock_data, get_stock_info, get_csv_path, list_saved_data
+from app.services.stock_service import get_stock_data, get_stock_info, get_csv_path, list_saved_data, search_tickers
 import os
 
 router = APIRouter()
+
+
+@router.get("/autocomplete")
+async def autocomplete(q: str = Query(..., min_length=1)):
+    """Get search suggestions for a query."""
+    return search_tickers(q)
 
 
 @router.get("/search/{ticker}")

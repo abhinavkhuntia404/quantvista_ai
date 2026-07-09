@@ -6,14 +6,14 @@ import {
   Search, TrendingUp, TrendingDown, Download, FileText,
   BarChart3, Activity, Shield, Brain, RefreshCw, Info,
   ChevronDown, DollarSign, Percent, AlertTriangle, Target,
-  LayoutDashboard
+  LayoutDashboard, Briefcase
 } from "lucide-react"
 import {
-  searchStock, getFullAnalysis, getStockNews, downloadPdfReport,
-  downloadCsvReport, downloadStockCsv,
-  type StockData, type AnalysisResult, type NewsResult
+  searchStock, getFullAnalysis, getStockNews,
+  downloadPdfReport, downloadCsvReport, downloadStockCsv, getTechnicals,
+  type StockData, type AnalysisResult, type NewsResult, type TechnicalResult
 } from "@/lib/api"
-import { formatCurrency, formatPercent, formatMarketCap } from "@/lib/utils"
+import { formatCurrency, formatPercent, formatMarketCap, getExchangeInfo, getMarketStatus, formatDateTime } from "@/lib/utils"
 import PriceChart from "@/components/PriceChart"
 import MonteCarloChart from "@/components/MonteCarloChart"
 import DistributionChart from "@/components/DistributionChart"
@@ -21,7 +21,10 @@ import VolatilityChart from "@/components/VolatilityChart"
 import RiskGauge from "@/components/RiskGauge"
 import ConfidenceIntervalChart from "@/components/ConfidenceIntervalChart"
 import NewsPanel from "@/components/NewsPanel"
-
+import AdvancedSearch from "@/components/AdvancedSearch"
+import TechnicalDashboard from "@/components/TechnicalDashboard"
+import FundamentalDashboard from "@/components/FundamentalDashboard"
+import { DownloadReportButton } from "@/components/pdf/DownloadReportButton"
 const POPULAR_TICKERS = ["AAPL", "MSFT", "TSLA", "NVDA", "GOOGL", "AMZN", "RELIANCE.NS", "TCS.NS"]
 
 export default function DashboardPage() {
@@ -31,6 +34,7 @@ export default function DashboardPage() {
   const [stockData, setStockData] = useState<StockData | null>(null)
   const [analysis, setAnalysis] = useState<AnalysisResult | null>(null)
   const [news, setNews] = useState<NewsResult | null>(null)
+  const [technicals, setTechnicals] = useState<TechnicalResult | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [activeTab, setActiveTab] = useState("overview")
 
@@ -51,6 +55,13 @@ export default function DashboardPage() {
       setStockData(stockRes)
       setAnalysis(analysisRes)
       setNews(newsRes)
+
+      try {
+        const tech = await getTechnicals(t)
+        setTechnicals(tech)
+      } catch (err) {
+        console.error("Technicals failed:", err)
+      }
     } catch (err: any) {
       setError(err.message || "Failed to load data. Check ticker and try again.")
       setStockData(null)
@@ -68,18 +79,8 @@ export default function DashboardPage() {
       {/* Top Bar */}
       <div className="flex flex-col md:flex-row gap-4 mb-6">
         {/* Search */}
-        <div className="relative flex-1 max-w-xl">
-          <Search size={18} className="absolute left-4 top-1/2 -translate-y-1/2"
-            style={{ color: "var(--text-muted)" }} />
-          <input
-            type="text"
-            value={ticker}
-            onChange={(e) => setTicker(e.target.value.toUpperCase())}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            placeholder="Search stocks... AAPL, MSFT, RELIANCE.NS"
-            className="search-input"
-            id="stock-search-input"
-          />
+        <div className="flex-1 max-w-xl">
+          <AdvancedSearch onSelect={handleSearch} initialTicker={ticker} />
         </div>
 
         {/* Days selector */}
@@ -143,40 +144,95 @@ export default function DashboardPage() {
         {stockData && analysis && !loading && (
           <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
             {/* Stock Header */}
-            <div className="glass-card p-5 mb-6">
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="glass-card p-6 mb-6 relative overflow-hidden">
+              <div className="absolute top-0 left-0 w-full h-1" style={{ background: "var(--gradient-primary)" }} />
+              
+              <div className="flex flex-col lg:flex-row lg:items-start justify-between gap-6">
                 <div>
-                  <div className="flex items-center gap-3 mb-1">
-                    <h1 className="text-2xl font-bold" style={{ color: "var(--text-primary)" }}>
+                  <div className="flex items-center gap-3 mb-2 flex-wrap">
+                    <h1 className="text-3xl font-bold" style={{ color: "var(--text-primary)" }}>
                       {stockData.info.name}
                     </h1>
-                    <span className="badge badge-blue">{stockData.info.ticker}</span>
+                    <span className="badge badge-blue text-sm">{stockData.info.ticker}</span>
+                    
+                    {(() => {
+                      const ex = getExchangeInfo(stockData.info.exchange, stockData.info.ticker);
+                      return (
+                        <span className="text-xs px-3 py-1 rounded-full flex items-center gap-1.5 bg-white/5 border border-white/10 text-white">
+                          {ex.flag} {ex.name}
+                        </span>
+                      )
+                    })()}
                   </div>
-                  <div className="flex items-center gap-4">
-                    <span className="text-3xl font-bold gradient-text">
-                      {formatCurrency(currentPrice, stockData.info.currency)}
-                    </span>
+                  
+                  <div className="flex items-center gap-3 mb-4 flex-wrap">
                     {stockData.info.sector && stockData.info.sector !== "N/A" && (
-                      <span className="text-xs px-3 py-1 rounded-full"
-                        style={{ background: "rgba(139,92,246,0.1)", color: "var(--accent-purple)" }}>
-                        {stockData.info.sector}
+                      <span className="text-xs px-2.5 py-1 rounded border"
+                        style={{ background: "rgba(139,92,246,0.1)", borderColor: "rgba(139,92,246,0.2)", color: "var(--accent-purple)" }}>
+                        Sector: {stockData.info.sector}
+                      </span>
+                    )}
+                    {stockData.info.industry && stockData.info.industry !== "N/A" && (
+                      <span className="text-xs px-2.5 py-1 rounded border"
+                        style={{ background: "rgba(6,182,212,0.1)", borderColor: "rgba(6,182,212,0.2)", color: "var(--accent-cyan)" }}>
+                        Industry: {stockData.info.industry}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex items-baseline gap-4">
+                    {(() => {
+                      const currency = getExchangeInfo(stockData.info.exchange, stockData.info.ticker).currency;
+                      return (
+                        <span className="text-5xl font-bold gradient-text tracking-tight">
+                          {formatCurrency(currentPrice, currency)}
+                        </span>
+                      )
+                    })()}
+                    
+                    {stockData.info.previous_close && (
+                      <span className={`text-lg font-medium ${currentPrice >= stockData.info.previous_close ? "text-green-500" : "text-red-500"}`}>
+                        {currentPrice >= stockData.info.previous_close ? "+" : ""}
+                        {formatCurrency(currentPrice - stockData.info.previous_close, getExchangeInfo(stockData.info.exchange, stockData.info.ticker).currency)}
+                        {" "}
+                        ({formatPercent((currentPrice - stockData.info.previous_close) / stockData.info.previous_close)})
                       </span>
                     )}
                   </div>
                 </div>
-                <div className="flex gap-2">
-                  <button onClick={() => downloadStockCsv(stockData.info.ticker)}
-                    className="btn-secondary text-xs">
-                    <Download size={14} /> CSV Data
-                  </button>
-                  <button onClick={() => downloadPdfReport(stockData.info.ticker, days)}
-                    className="btn-secondary text-xs">
-                    <FileText size={14} /> PDF Report
-                  </button>
-                  <button onClick={() => downloadCsvReport(stockData.info.ticker, days)}
-                    className="btn-secondary text-xs">
-                    <Download size={14} /> CSV Report
-                  </button>
+                
+                <div className="flex flex-col items-end gap-4 shrink-0 mt-2 lg:mt-0">
+                  <div className="text-right">
+                    {(() => {
+                      const mkt = getMarketStatus();
+                      return (
+                        <div className="flex items-center justify-end gap-2 mb-1.5">
+                          <div className="w-2 h-2 rounded-full animate-pulse" style={{ background: mkt.color }} />
+                          <span className="text-xs font-semibold uppercase tracking-wider" style={{ color: mkt.color }}>
+                            {mkt.status}
+                          </span>
+                        </div>
+                      )
+                    })()}
+                    <span className="text-[11px]" style={{ color: "var(--text-muted)" }}>
+                      Updated {formatDateTime()}
+                    </span>
+                  </div>
+                  
+                  <div className="flex flex-wrap justify-end gap-2 mt-2">
+                    <button onClick={() => downloadStockCsv(stockData.info.ticker)}
+                      className="btn-secondary text-xs px-3 py-2 h-auto">
+                      <Download size={14} /> CSV Data
+                    </button>
+                    {analysis && technicals && (
+                      <DownloadReportButton 
+                        stockData={stockData} 
+                        analysis={analysis} 
+                        technicals={technicals} 
+                        fileName={`QuantVista_${ticker}_Report.pdf`} 
+                      />
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -198,29 +254,104 @@ export default function DashboardPage() {
               </div>
             </div>
 
-            {/* Summary Cards */}
+            {/* Phase 3: Hero & AI Recommendation */}
             {fpr && (
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 mb-6">
-                {[
-                  { label: "Expected Price", value: formatCurrency(fpr.expected_price), icon: DollarSign, color: "var(--accent-blue)" },
-                  { label: "Median Price", value: formatCurrency(fpr.median_price), icon: Target, color: "var(--accent-cyan)" },
-                  { label: "95th Percentile", value: formatCurrency(fpr.percentile_95), icon: TrendingUp, color: "var(--accent-green)" },
-                  { label: "5th Percentile", value: formatCurrency(fpr.percentile_5), icon: TrendingDown, color: "var(--accent-red)" },
-                  { label: "Prob. Increase", value: `${(fpr.prob_increase * 100).toFixed(1)}%`, icon: Percent, color: fpr.prob_increase > 0.5 ? "var(--accent-green)" : "var(--accent-red)" },
-                  { label: "Risk Score", value: `${fpr.risk_score?.toFixed(0)}/100`, icon: Shield, color: fpr.risk_score < 50 ? "var(--accent-green)" : "var(--accent-red)" },
-                ].map((card, i) => (
-                  <motion.div key={card.label}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: i * 0.05 }}
-                    className="stat-card">
-                    <div className="flex items-center gap-2 mb-2">
-                      <card.icon size={14} style={{ color: card.color }} />
-                      <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{card.label}</span>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+                {/* Left side: AI Recommendation Card */}
+                <div className="glass-card p-6 relative overflow-hidden h-full flex flex-col"
+                  style={{ background: fpr.prob_increase > 0.5 ? "rgba(16,185,129,0.05)" : "rgba(239,68,68,0.05)",
+                           borderColor: fpr.prob_increase > 0.5 ? "rgba(16,185,129,0.2)" : "rgba(239,68,68,0.2)" }}>
+                  <div className="absolute top-0 left-0 w-full h-1" 
+                    style={{ background: fpr.prob_increase > 0.5 ? "var(--gradient-success)" : "var(--gradient-danger)" }} />
+                  
+                  <div className="flex justify-between items-start mb-4">
+                    <div>
+                      <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "var(--text-muted)" }}>
+                        AI Recommendation
+                      </p>
+                      <h2 className="text-3xl font-black tracking-tight" style={{ color: fpr.prob_increase > 0.5 ? "var(--accent-green)" : "var(--accent-red)" }}>
+                        {fpr.prob_increase > 0.6 ? "STRONG BUY" : fpr.prob_increase > 0.5 ? "BUY" : fpr.prob_increase > 0.4 ? "HOLD" : "SELL"}
+                      </h2>
                     </div>
-                    <p className="text-lg font-bold" style={{ color: card.color }}>{card.value}</p>
-                  </motion.div>
-                ))}
+                    <div className="text-right">
+                      <p className="text-xs font-semibold uppercase tracking-widest mb-1" style={{ color: "var(--text-muted)" }}>
+                        Confidence
+                      </p>
+                      <h2 className="text-3xl font-black tracking-tight" style={{ color: "var(--text-primary)" }}>
+                        {(Math.max(fpr.prob_increase, 1 - fpr.prob_increase) * 100).toFixed(0)}%
+                      </h2>
+                    </div>
+                  </div>
+                  
+                  <div className="flex-1 mt-2">
+                    <p className="text-sm font-semibold mb-2" style={{ color: "var(--text-primary)" }}>Why?</p>
+                    <p className="text-sm leading-relaxed" style={{ color: "var(--text-secondary)" }}>
+                      Quantitative models suggest a {fpr.prob_increase > 0.5 ? "bullish" : "bearish"} trend over the next {days} days. 
+                      The median expected price is {formatCurrency(fpr.median_price, stockData.info.currency)}, representing a 
+                      {' '}
+                      <span style={{ color: fpr.median_price > currentPrice ? "var(--accent-green)" : "var(--accent-red)" }}>
+                        {formatPercent((fpr.median_price - currentPrice) / currentPrice)}
+                      </span>
+                      {' '} expected return. 
+                      Risk is evaluated as {analysis.risk_score?.category || "Moderate"} with a score of {analysis.risk_score?.total_score?.toFixed(0) || 50}/100.
+                    </p>
+                  </div>
+                </div>
+
+                {/* Right side: Scenario Analysis & Metrics */}
+                <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {/* Scenarios */}
+                  <div className="glass-card p-5">
+                    <h3 className="text-sm font-semibold mb-4" style={{ color: "var(--text-primary)" }}>Scenario Analysis</h3>
+                    <div className="space-y-4">
+                      <div>
+                        <div className="flex justify-between items-end mb-1">
+                          <span className="text-sm font-medium" style={{ color: "var(--accent-green)" }}>Bull Case (95th %ile)</span>
+                          <span className="font-bold">{formatCurrency(fpr.percentile_95, stockData.info.currency)}</span>
+                        </div>
+                        <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-green-500" style={{ width: "95%" }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-end mb-1">
+                          <span className="text-sm font-medium" style={{ color: "var(--accent-blue)" }}>Base Case (Median)</span>
+                          <span className="font-bold">{formatCurrency(fpr.median_price, stockData.info.currency)}</span>
+                        </div>
+                        <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-blue-500" style={{ width: "50%" }} />
+                        </div>
+                      </div>
+                      <div>
+                        <div className="flex justify-between items-end mb-1">
+                          <span className="text-sm font-medium" style={{ color: "var(--accent-red)" }}>Bear Case (5th %ile)</span>
+                          <span className="font-bold">{formatCurrency(fpr.percentile_5, stockData.info.currency)}</span>
+                        </div>
+                        <div className="w-full bg-white/5 h-1.5 rounded-full overflow-hidden">
+                          <div className="h-full rounded-full bg-red-500" style={{ width: "5%" }} />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Quantitative Metrics */}
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { label: "Expected Return", value: formatPercent((fpr.expected_price - currentPrice) / currentPrice), icon: DollarSign, color: fpr.expected_price > currentPrice ? "var(--accent-green)" : "var(--accent-red)" },
+                      { label: "Prob. Increase", value: `${(fpr.prob_increase * 100).toFixed(1)}%`, icon: Percent, color: fpr.prob_increase > 0.5 ? "var(--accent-green)" : "var(--accent-red)" },
+                      { label: "Trend Strength", value: (Math.abs(fpr.prob_increase - 0.5) * 200).toFixed(0) + "/100", icon: TrendingUp, color: "var(--accent-purple)" },
+                      { label: "Risk Score", value: `${fpr.risk_score?.toFixed(0) || 0}/100`, icon: Shield, color: fpr.risk_score < 50 ? "var(--accent-green)" : "var(--accent-red)" },
+                    ].map((card, i) => (
+                      <div key={card.label} className="glass-card p-4 flex flex-col justify-center bg-white/5 border-white/5 transition-all hover:bg-white/10">
+                        <div className="flex items-center gap-2 mb-2">
+                          <card.icon size={14} style={{ color: card.color }} />
+                          <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>{card.label}</span>
+                        </div>
+                        <p className="text-xl font-bold" style={{ color: card.color }}>{card.value}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             )}
 
@@ -229,6 +360,8 @@ export default function DashboardPage() {
               style={{ borderBottom: "1px solid var(--border)" }}>
               {[
                 { id: "overview", label: "Overview", icon: LayoutDashboard },
+                { id: "fundamentals", label: "Fundamentals", icon: Briefcase },
+                { id: "technicals", label: "Technicals", icon: Activity },
                 { id: "models", label: "Models", icon: Activity },
                 { id: "risk", label: "Risk", icon: Shield },
                 { id: "news", label: "News", icon: BarChart3 },
@@ -268,6 +401,28 @@ export default function DashboardPage() {
                   <RiskGauge score={analysis.risk_score?.total_score || 0} category={analysis.risk_score?.category || "N/A"} components={analysis.risk_score?.components} />
                 </div>
               </div>
+            )}
+
+            {activeTab === "fundamentals" && (
+              <motion.div
+                key="fundamentals"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <FundamentalDashboard info={stockData.info} />
+              </motion.div>
+            )}
+
+            {activeTab === "technicals" && technicals && (
+              <motion.div
+                key="technicals"
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+              >
+                <TechnicalDashboard technicals={technicals} />
+              </motion.div>
             )}
 
             {activeTab === "models" && (
