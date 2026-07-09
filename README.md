@@ -1,4 +1,6 @@
 # QuantVista AI
+link 
+https://quantvistaai.vercel.app/
 
 > Quantitative Stock Analysis Platform — Monte Carlo, GBM, VaR, and more.
 
