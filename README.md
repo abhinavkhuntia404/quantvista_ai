@@ -2,6 +2,50 @@ use this link above link is dead
 
 https://quantvista-kappa.vercel.app/
 
+QuantVista AI
+QuantVista AI is a modern quantitative stock analytics platform designed to help retail investors, part-time traders, professional traders, and analysts evaluate market uncertainty using probability-based models and quantitative finance techniques.
+Instead of attempting to predict the exact future price of a stock, QuantVista AI estimates a range of possible outcomes and provides actionable insights through statistical simulations, historical data analysis, and risk management metrics.
+Features
+Historical market data using yfinance
+Monte Carlo Simulation
+Geometric Brownian Motion (GBM)
+Historical Scenario Analysis
+Value at Risk (VaR)
+Historical Volatility Analysis
+Expected Return Estimation
+Confidence Intervals
+Probability Distribution of Future Prices
+Portfolio Risk Analytics
+Interactive Charts and Dashboards
+PDF & CSV Report Generation
+AI-powered Investment Insights
+Responsive Bloomberg-inspired UI
+Dark & Light Mode
+Secure Authentication
+Cloud Deployment on Vercel
+Tech Stack
+Frontend
+Next.js
+React
+TypeScript
+Tailwind CSS
+ShadCN UI
+Plotly
+Backend
+FastAPI
+Python
+NumPy
+Pandas
+SciPy
+Statsmodels
+yfinance
+Database
+PostgreSQL
+Deployment
+Vercel
+Rander 
+Mission
+Our mission is to make institutional-grade quantitative analysis accessible to every investor by transforming complex financial models into intuitive, probability-based insights that support better investment and risk management decisions.
 
 
 
