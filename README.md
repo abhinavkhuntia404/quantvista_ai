@@ -46,23 +46,25 @@ Tech Stack
 
 Frontend
 
-Next.js
-React
-TypeScript
-Tailwind CSS
-ShadCN UI
+Next.js,
+React,
+TypeScript,
+Tailwind CSS,
+ShadCN UI,
 Plotly
 
 
 Backend
 
-FastAPI
-Python
-NumPy
-Pandas
-SciPy
-Statsmodels
-yfinance
+FastAPI,
+Python,
+NumPy,
+Pandas,
+SciPy,
+Statsmodels,
+yfinance,
+
+
 Database
 
 PostgreSQL
@@ -70,7 +72,7 @@ PostgreSQL
 
 Deployment
 
-Vercel
+Vercel,
 Rander 
 
 
