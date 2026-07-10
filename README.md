@@ -1,121 +1,129 @@
-use this link above link is dead
+<p align="center">
+  <img src="public/logo.png" alt="QuantVista AI" width="80" height="80" style="border-radius: 16px;" />
+</p>
 
-https://quantvista-kappa.vercel.app/
+<h1 align="center">QuantVista AI</h1>
 
-QuantVista AI
-QuantVista AI is a modern quantitative stock analytics platform designed to help retail investors, part-time traders, professional traders, and analysts evaluate market uncertainty using probability-based models and quantitative finance techniques.
-Instead of attempting to predict the exact future price of a stock, QuantVista AI estimates a range of possible outcomes and provides actionable insights through statistical simulations, historical data analysis, and risk management metrics.
-Features
+<p align="center">
+  <strong>AI-Powered Financial Research & Quantitative Analytics Platform</strong>
+</p>
 
-Historical market data using yfinance
+<p align="center">
+  <a href="https://quantvista-kappa.vercel.app">Live Demo</a> •
+  <a href="#features">Features</a> •
+  <a href="#tech-stack">Tech Stack</a> •
+  <a href="#getting-started">Getting Started</a>
+</p>
 
-Monte Carlo Simulation
+---
 
-Geometric Brownian Motion (GBM)
+## Overview
 
-Historical Scenario Analysis
-Value at Risk (VaR)
+QuantVista AI is an institutional-grade quantitative research platform that combines **AI, statistics, and financial engineering** to help users make better-informed financial decisions. It is **not** a stock prediction tool — it's a research platform focused on:
 
+- **Quantitative Finance** — Monte Carlo simulations, Geometric Brownian Motion
+- **Risk Management** — VaR, CVaR, Sharpe Ratio, Maximum Drawdown
+- **Fundamental Analysis** — P/E, Market Cap, Dividend Yields, Financial Ratios
+- **Technical Analysis** — RSI, MACD, Bollinger Bands, Moving Averages
+- **AI-Generated Research** — Natural language investment theses from quantitative models
+- **Portfolio Analytics** — Correlation matrices, diversification scoring
+- **News Intelligence** — Real-time financial news aggregation
 
-Historical Volatility Analysis
+## Features
 
-Expected Return Estimation
+| Feature | Description |
+|---------|-------------|
+| 🧠 AI Research | Neural network-generated investment analysis with probabilistic insights |
+| 📊 Monte Carlo Engine | 10,000+ stochastic simulations for price probability distributions |
+| 🛡️ Risk Intelligence | VaR, CVaR, Sharpe Ratio, Sortino Ratio, Beta, Max Drawdown |
+| 📈 Technical Dashboard | RSI, MACD, Bollinger Bands, SMA/EMA with signal generation |
+| 💼 Portfolio Analytics | Multi-asset correlation, diversification scoring, weight optimization |
+| 📄 PDF Reports | Institutional-grade A4 research reports (downloadable) |
+| ⭐ Watchlist | Track stocks with real-time price updates |
+| 🎓 Academy | Video masterclasses and historical case studies |
+| 🌗 Dark/Light Theme | Premium dark-first design with smooth theme switching |
+| 🔐 Authentication | Google OAuth via NextAuth.js |
 
-Confidence Intervals
+## Tech Stack
 
-Probability Distribution of Future Prices
+### Frontend
+- **Next.js 16** — React framework with App Router
+- **TypeScript** — Type-safe development
+- **Tailwind CSS 4** — Utility-first styling
+- **Framer Motion** — Smooth animations and page transitions
+- **Recharts / Plotly.js** — Interactive financial charts
+- **Radix UI** — Accessible component primitives
+- **Lucide Icons** — Premium icon library
 
+### Backend
+- **Python / FastAPI** — High-performance REST API
+- **Yahoo Finance API** — Real-time market data
+- **NumPy / SciPy** — Quantitative computations
+- **Pandas** — Data analysis and manipulation
 
-Portfolio Risk Analytics
+### Infrastructure
+- **Vercel** — Frontend hosting with edge deployment
+- **Render** — Backend API hosting
+- **Prisma + PostgreSQL** — Database ORM
+- **Upstash Redis** — Session caching
+- **NextAuth.js** — Authentication (Google OAuth)
 
-Interactive Charts and Dashboards
+## Design Philosophy
 
-PDF & CSV Report Generation
+The UI is inspired by the best elements of **Apple**, **Bloomberg Terminal**, **Stripe Dashboard**, and **Linear** — combining:
 
-AI-powered Investment Insights
-
-Responsive Bloomberg-inspired UI
-
-Dark & Light Mode
-
-Secure Authentication
-
-Cloud Deployment on Vercel
-
-Tech Stack
-
-Frontend
-
-Next.js,
-React,
-TypeScript,
-Tailwind CSS,
-ShadCN UI,
-Plotly
-
-
-Backend
-
-FastAPI,
-Python,
-NumPy,
-Pandas,
-SciPy,
-Statsmodels,
-yfinance,
-
-
-Database
-
-PostgreSQL
-
-
-Deployment
-
-Vercel,
-Rander 
-
-
-
-Mission
-Our mission is to make institutional-grade quantitative analysis accessible to every investor by transforming complex financial models into intuitive, probability-based insights that support better investment and risk management decisions.
-
-
-
-
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+- 🖤 Premium dark-first glassmorphism design
+- ✨ Animated aurora background effects
+- 📐 Clean typography with Inter font family
+- 🎯 Data-rich but clutter-free layouts
+- 💫 Smooth micro-animations via Framer Motion
+- 🏗️ Enterprise SaaS layout with collapsible sidebar
 
 ## Getting Started
 
-First, run the development server:
+### Prerequisites
+- Node.js 18+
+- Python 3.9+
+- PostgreSQL database
 
+### Frontend Setup
 ```bash
+# Install dependencies
+npm install
+
+# Set up environment variables
+cp .env.example .env.local
+# Edit .env.local with your credentials
+
+# Run development server
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Backend Setup
+```bash
+cd backend
+pip install -r requirements.txt
+python main.py
+```
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Environment Variables
+```
+DATABASE_URL=          # PostgreSQL connection string
+NEXTAUTH_SECRET=       # Random secret for NextAuth
+NEXTAUTH_URL=          # http://localhost:3000
+GOOGLE_CLIENT_ID=      # Google OAuth client ID
+GOOGLE_CLIENT_SECRET=  # Google OAuth client secret
+NEXT_PUBLIC_API_URL=   # Backend API URL
+UPSTASH_REDIS_REST_URL=
+UPSTASH_REDIS_REST_TOKEN=
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Disclaimer
 
-## Learn More
+QuantVista AI provides financial modeling software and data analytics for **informational and educational purposes only**. We are not a registered investment advisor. The information provided does not constitute financial advice. Trading involves significant risk of loss. Past performance is not indicative of future results. Always consult a licensed financial professional before making investment decisions.
 
-To learn more about Next.js, take a look at the following resources:
+---
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+<p align="center">
+  Built with ❤️ by <a href="https://github.com/abhinavkhuntia404">Abhinav Khuntia</a>
+</p>

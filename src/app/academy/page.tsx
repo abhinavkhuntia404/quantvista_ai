@@ -145,6 +145,7 @@ export default function AcademyPage() {
               <div className="relative aspect-video rounded-xl overflow-hidden mb-4 bg-gray-900 group-hover:shadow-glow transition-all">
                 <img 
                   src={`https://img.youtube.com/vi/${video.id}/maxresdefault.jpg`} 
+                  onError={(e) => { e.currentTarget.src = `https://img.youtube.com/vi/${video.id}/hqdefault.jpg` }}
                   alt={video.title}
                   className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity group-hover:scale-105 duration-500"
                 />

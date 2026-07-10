@@ -4,9 +4,14 @@ import AuthProvider from "@/components/AuthProvider"
 import { ThemeProvider } from "@/components/ThemeProvider"
 
 export const metadata: Metadata = {
-  title: "QuantVista AI — Quantitative Stock Analysis Platform",
-  description: "Advanced quantitative stock analysis using Monte Carlo simulations, Geometric Brownian Motion, and probabilistic forecasting for smarter trading decisions.",
-  keywords: ["stock analysis", "Monte Carlo", "quantitative finance", "trading", "risk analysis"],
+  title: "QuantVista AI — Institutional Quantitative Research Platform",
+  description: "AI-powered financial research and quantitative analytics platform. Monte Carlo simulations, risk management, fundamental analysis, and AI-generated insights for smarter investment decisions.",
+  keywords: ["quantitative analysis", "Monte Carlo", "financial research", "risk management", "AI analytics", "portfolio analysis", "stock analysis"],
+  openGraph: {
+    title: "QuantVista AI — Institutional Quantitative Research",
+    description: "The world's most beautiful AI-powered financial research platform. Quantitative analysis, risk management, and AI-driven insights.",
+    type: "website",
+  },
 }
 
 export default function RootLayout({
@@ -16,27 +21,12 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="antialiased transition-colors duration-500" suppressHydrationWarning>
+      <body className="antialiased noise-overlay" suppressHydrationWarning>
         <ThemeProvider attribute="class" defaultTheme="dark" enableSystem disableTransitionOnChange>
           <AuthProvider>
             {children}
           </AuthProvider>
         </ThemeProvider>
-        
-        {/* Google Translate Script for Local Indian Languages */}
-        <div id="google_translate_element" className="fixed bottom-4 left-4 z-[100] opacity-30 hover:opacity-100 transition-opacity" style={{ transform: "scale(0.8)", transformOrigin: "bottom left" }}></div>
-        <script type="text/javascript" dangerouslySetInnerHTML={{
-          __html: `
-            function googleTranslateElementInit() {
-              new google.translate.TranslateElement({
-                pageLanguage: 'en', 
-                includedLanguages: 'en,hi,bn,te,mr,ta,ur,gu,kn,ml,pa,or', 
-                layout: google.translate.TranslateElement.InlineLayout.SIMPLE
-              }, 'google_translate_element');
-            }
-          `
-        }} />
-        <script type="text/javascript" src="//translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"></script>
       </body>
     </html>
   )

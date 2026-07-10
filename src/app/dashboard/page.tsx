@@ -75,31 +75,31 @@ export default function DashboardPage() {
   const fpr = analysis?.future_price_range
 
   return (
-    <div className="p-4 md:p-6 max-w-[1600px] mx-auto">
+    <div className="p-4 md:p-8 max-w-[1600px] mx-auto">
       {/* Top Bar */}
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        {/* Search */}
+      <div className="flex flex-col md:flex-row gap-3 mb-8 items-start md:items-center">
         <div className="flex-1 max-w-xl">
           <AdvancedSearch onSelect={handleSearch} initialTicker={ticker} />
         </div>
 
-        {/* Days selector */}
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-medium" style={{ color: "var(--text-muted)" }}>Horizon:</span>
+        <div className="flex items-center gap-1.5 p-1 rounded-xl" style={{ background: "var(--bg-secondary)" }}>
+          <span className="text-[11px] font-medium px-2" style={{ color: "var(--text-muted)" }}>Horizon</span>
           {[7, 14, 30, 60, 90].map(d => (
             <button key={d}
               onClick={() => { setDays(d); if (stockData) handleSearch() }}
-              className={`tab-btn px-3 py-1.5 rounded-lg text-xs ${days === d ? "active" : ""}`}
-              style={days === d ? { background: "rgba(59,130,246,0.15)", color: "var(--accent-blue)" } : {}}
+              className="px-3 py-1.5 rounded-lg text-xs font-medium transition-all"
+              style={days === d
+                ? { background: "var(--accent-blue)", color: "white", boxShadow: "0 2px 8px rgba(59,130,246,0.3)" }
+                : { color: "var(--text-secondary)" }
+              }
             >
               {d}D
             </button>
           ))}
         </div>
 
-        {/* Analyze button */}
         <button onClick={() => handleSearch()} className="btn-primary" id="analyze-button" disabled={loading}>
-          {loading ? <RefreshCw size={16} className="animate-spin" /> : <BarChart3 size={16} />}
+          {loading ? <RefreshCw size={15} className="animate-spin" /> : <BarChart3 size={15} />}
           {loading ? "Analyzing..." : "Analyze"}
         </button>
       </div>
@@ -132,10 +132,18 @@ export default function DashboardPage() {
 
       {/* Loading */}
       {loading && (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <div key={i} className="skeleton" style={{ height: i < 4 ? "100px" : "300px" }} />
-          ))}
+        <div className="space-y-6 mb-6 animate-fade-in">
+          <div className="skeleton" style={{ height: "180px", borderRadius: "var(--radius-lg)" }} />
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: "88px", borderRadius: "var(--radius-md)" }} />
+            ))}
+          </div>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="skeleton" style={{ height: "280px", borderRadius: "var(--radius-lg)" }} />
+            ))}
+          </div>
         </div>
       )}
 
@@ -622,17 +630,25 @@ export default function DashboardPage() {
 
       {/* Empty state */}
       {!stockData && !loading && !error && (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}
-          className="flex flex-col items-center justify-center py-20 text-center">
-          <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-6 animate-float"
-            style={{ background: "var(--gradient-primary)", opacity: 0.9 }}>
-            <BarChart3 size={36} color="white" />
+        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5 }}
+          className="flex flex-col items-center justify-center py-24 text-center relative">
+          {/* Decorative orbs */}
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="w-64 h-64 rounded-full opacity-[0.06] blur-[80px]" style={{ background: "var(--accent-blue)" }} />
+            <div className="w-48 h-48 rounded-full opacity-[0.04] blur-[60px] -ml-20 -mt-20" style={{ background: "var(--accent-purple)" }} />
           </div>
-          <h2 className="text-2xl font-bold mb-3 gradient-text">Start Your Analysis</h2>
-          <p className="text-sm max-w-md" style={{ color: "var(--text-muted)" }}>
-            Search for any stock ticker to run quantitative analysis with Monte Carlo simulations,
-            risk metrics, and AI-powered insights.
-          </p>
+          <div className="relative">
+            <div className="w-20 h-20 rounded-2xl flex items-center justify-center mb-8 animate-float mx-auto"
+              style={{ background: "var(--gradient-primary)", boxShadow: "0 8px 32px rgba(59,130,246,0.25)" }}>
+              <BarChart3 size={34} color="white" />
+            </div>
+            <h2 className="text-2xl font-bold mb-3 gradient-text tracking-tight">Start Your Analysis</h2>
+            <p className="text-sm max-w-sm mx-auto leading-relaxed" style={{ color: "var(--text-muted)" }}>
+              Search for any stock ticker to run quantitative analysis with Monte Carlo simulations,
+              risk assessment, and AI-powered research insights.
+            </p>
+          </div>
         </motion.div>
       )}
     </div>

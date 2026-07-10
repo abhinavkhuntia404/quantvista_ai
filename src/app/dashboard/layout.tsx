@@ -80,7 +80,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
           >
             {collapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
-          
+
           <div className={`flex items-center ${collapsed ? "justify-center flex-col gap-4" : "justify-between px-3"} py-2 mt-4`}>
             <ThemeToggle />
             <Link href="/api/auth/signout" className="text-sm font-medium hover:text-red-400" style={{ color: "var(--text-secondary)" }}>
